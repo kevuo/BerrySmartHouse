@@ -1,0 +1,6 @@
+{"k":"0000000078","o":"0000000082","v":"001"}
+{"_id":2,"_uid":2,"_dt":1472974972939,"_s":"5011bd71e96ae0bd5e048b278aa3e00e"}
+{"username":"kevuo","pass":"moradodecorazon","_id":{"$wrap":"$oid","v":2},"__v":0}
+{"k":"0000000078","o":"0000000081","v":"001"}
+{"_id":3,"_uid":3,"_dt":1472974972942,"_s":"fdbb2f574204efb96853d8ed2a1cbc1e"}
+{"username":"manzumbado","pass":"manolo123","_id":{"$wrap":"$oid","v":3},"__v":0}
