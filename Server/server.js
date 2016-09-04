@@ -2,6 +2,7 @@ var express     = require('express');
 var app         = express();
 var bodyParser  = require('body-parser');
 var morgan		= require('morgan');
+var tungus 		= require('tungus');
 var mongoose	= require('mongoose');
 var jwt			= require('jsonwebtoken');
 var config		= require('./config/config');         //This is to get the config file
@@ -96,6 +97,7 @@ apiRoutes.use(function(req, res, next){
 
 	}
 });
+
 
 // basic Route (GET http://localhost:8080)
 apiRoutes.get('/test', function(req, res) {
