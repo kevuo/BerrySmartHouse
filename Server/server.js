@@ -5,6 +5,8 @@ var morgan		= require('morgan');
 var tungus 		= require('tungus');
 var mongoose	= require('mongoose');
 var jwt			= require('jsonwebtoken');
+var child_p     = require('child_process');
+var fs 			= require('fs');
 var config		= require('./config/config');         //This is to get the config file
 var User 		= require('./app/models/user'); //This is to get the mongoose model
  
@@ -23,7 +25,6 @@ mongoose.set('debug', true);
 
 app.use(morgan('dev')); //This is lo log requests to the console
  
-
 
 //******************
 //Routes
@@ -99,10 +100,25 @@ apiRoutes.use(function(req, res, next){
 });
 
 
-// basic Route (GET http://localhost:8080)
-apiRoutes.get('/test', function(req, res) {
-  res.send('Hi! The API is at http://localhost:' + port + '/api');
+// get all doors state (GET http://localhost:8080)
+apiRoutes.get('/doors/getAll', function(req, res) {
+  var output = child_p.execSync('app/bin/SmartBerryWrapper -d', { encoding: 'utf8' });
+  res.send(JSON.parse(output));
 });
+
+// get all doors state (GET http://localhost:8080)
+apiRoutes.get('/lights/getAll', function(req, res) {
+  var output = child_p.execSync('app/bin/SmartBerryWrapper -l', { encoding: 'utf8' });
+  res.send(JSON.parse(output));
+});
+
+apiRoutes.get('/camera', function(req,res){
+	child_p.execSync('app/bin/SmartBerryWrapper -t', { encoding: 'utf8' });
+	var pic = fs.readFileSync('app/data/webcamshoot.jpeg');
+	var base64 = new Buffer(pic, 'binary').toString('base64');
+	var output={"picture": base64};
+	res.send(JSON.stringify(output));
+})
 
 // connect the api routes under /api/*
 app.use('/api', apiRoutes);
