@@ -49,10 +49,13 @@ angular.module('app')
 
 	var login = function(user){
 		return $q(function(resolve, reject){
-		  $http.post(API_ENDPOINT.url + '/login', user).then(function(result){
+			var parameter=JSON.stringify(user);
+		  $http.post(API_ENDPOINT.url + '/login', parameter).then(function(result){
+		  	console.log(parameter);
 		  	if(result.data.success){
 		  		storeUserCredentials(result.data.token);
-		  		resolve(result.data.msg); 		
+		  		resolve(result.data.msg);
+		  		console.log(result.data); 		
 		  	}else{
 		  		reject(result.data.msg);
 		  	}
