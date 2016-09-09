@@ -32,13 +32,13 @@ function ($scope, $stateParams) {
 
 .controller('pleaseSignInCtrl', function($scope, AuthService, $ionicPopup, $state){
 	$scope.user= {
-		name: '',
-		password: ''
+		username: '',
+		pass: ''
 	};
 
 	$scope.login= function(){
 		AuthService.login($scope.user).then(function(msg){
-		  $state.go('tabsController');
+		  $state.go('tabsController.homeLighting');
 		}, function(errMsg){
 			var alertPopup = $ionicPopup.alert({
 				title: 'Login failed!',
