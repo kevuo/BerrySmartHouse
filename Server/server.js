@@ -1,3 +1,6 @@
+//Created by manzumbado 
+//Last edited: September 8, 2016
+
 var express     = require('express');
 var app         = express();
 var bodyParser  = require('body-parser');
@@ -5,6 +8,8 @@ var morgan		= require('morgan');
 var tungus 		= require('tungus');
 var mongoose	= require('mongoose');
 var jwt			= require('jsonwebtoken');
+var child_p     = require('child_process');
+var fs 			= require('fs');
 var config		= require('./config/config');         //This is to get the config file
 var User 		= require('./app/models/user'); //This is to get the mongoose model
  
@@ -17,13 +22,16 @@ var User 		= require('./app/models/user'); //This is to get the mongoose model
 //This is to get the request parameters
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 app.set('myprecious', config.secret); //Secret key to encrypt password
 mongoose.connect(config.database); //This is used to connect to database
 mongoose.set('debug', true);
-
 app.use(morgan('dev')); //This is lo log requests to the console
- 
-
+child_p.execSync('app/bin/SmartBerryWrapper -c', { encoding: 'utf8' }); //Initial pin config
 
 //******************
 //Routes
@@ -43,6 +51,8 @@ var apiRoutes = express.Router();
 
 // Login an user (POST http://localhost:8080/api/login)
 apiRoutes.post('/login', function(req, res) {
+	console.log(req.header);
+	console.log(req.body);
 
 	//Find for an user with the given credentials
 	User.findOne({
@@ -99,11 +109,55 @@ apiRoutes.use(function(req, res, next){
 });
 
 
-// basic Route (GET http://localhost:8080)
-apiRoutes.get('/test', function(req, res) {
-  res.send('Hi! The API is at http://localhost:' + port + '/api');
+// get all doors state (GET http://localhost:8080)
+apiRoutes.get('/doors/getAll', function(req, res) {
+  var output = child_p.execSync('app/bin/SmartBerryWrapper -d', { encoding: 'utf8' });
+  res.send(JSON.parse(output));
 });
 
-// connect the api routes under /api/*
+// get all lights state (GET http://localhost:8080)
+apiRoutes.get('/lights/all', function(req, res) {
+  var output = child_p.execSync('app/bin/SmartBerryWrapper -l', { encoding: 'utf8' });
+  res.send(JSON.parse(output));
+});
+
+// set all lights state simultaneously (GET http://localhost:8080)
+apiRoutes.post('/lights/all', function(req, res) {
+  var output = child_p.execSync('app/bin/SmartBerryWrapper -a '+ req.body.value, { encoding: 'utf8' });
+  res.status(200).send({
+			success: true,
+			message: 'Thanks'
+		});
+});
+
+// set all lights state simultaneously (GET http://localhost:8080)
+apiRoutes.post('/lights', function(req, res) {
+  var pinNum= req.body.pin;
+  var value=req.body.value;
+  console.log("entering lights");
+  console.log(pinNum + " "+ value);
+  var output = child_p.execSync('app/bin/SmartBerryWrapper -s '+ pinNum +" "+value , { encoding: 'utf8' });
+  res.status(200).send({
+			success: true,
+			message: 'Thanks'
+		});
+});
+ 
+// get garage state (GET http://localhost:8080)
+apiRoutes.get('/garage/state', function(req, res) {
+  var output = child_p.execSync('app/bin/SmartBerryWrapper -g', { encoding: 'utf8' });
+  res.send(JSON.parse(output));
+});
+
+apiRoutes.get('/camera', function(req,res){
+	child_p.execSync('app/bin/SmartBerryWrapper -t', { encoding: 'utf8' });
+	var pic = fs.readFileSync('app/data/webcamshoot.jpeg');
+	var base64 = new Buffer(pic, 'binary').toString('base64');
+	var output={"picture": base64};
+	res.send(JSON.stringify(output));
+});
+
+
+// connect the api routes underut /api/*
 app.use('/api', apiRoutes);
 
